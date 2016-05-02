@@ -1,0 +1,22 @@
+{% extends "site_base.html" %}
+{% load i18n %}
+{% load url from future %}
+
+{% block body_outer %}
+    <div class="page-header">
+    <h2 class="page-title">Twitter</h2>
+    </div>
+
+    {% block body %}
+        {% if error_message %}
+            {{ error_message }}
+        {% endif %}
+
+        BODY BLOCK YEAH
+
+    {% endblock body %}
+
+    {% block sidebar %}
+    {% endblock sidebar %}
+
+{% endblock body_outer %}
