@@ -2,6 +2,17 @@
 {% load i18n %}
 {% load url from future %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <style>
+        #map {
+            height: 600px;
+        }
+    </style>
+{% endblock extra_head %}
+
 {% block body_outer %}
     <div class="page-header">
     <h2 class="page-title">Twitter</h2>
@@ -12,7 +23,42 @@
             {{ error_message }}
         {% endif %}
 
-        BODY BLOCK YEAH
+        <div id="map">hi</div>
+
+        <script>
+            // Load the tile images from OpenStreetMap
+            var mytiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            });
+            // Initialise an empty map
+            var map = L.map('map');
+{#            // Read the GeoJSON data with jQuery, and create a circleMarker element for each tweet#}
+{#            // Each tweet will be represented by a nice red dot#}
+            $.getJSON("/twitter/json_geo_tweets", function(data) {
+                var myStyle = {
+                    radius: 3,
+                    fillColor: "red",
+                    color: "red",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 1
+                };
+
+                var geojson = L.geoJson(data, {
+                    pointToLayer: function (feature, latlng) {
+                        return L.circleMarker(latlng, myStyle);
+                    }
+                });
+                geojson.addTo(map)
+            });
+            // Add the tiles to the map, and initialise the view in the middle of Europe
+            map.addLayer(mytiles).setView([50.5, 5.0], 2);
+        </script>
+
+        geo_tweets<pre>{{ geo_tweets }}</pre>
+
+        tweets: <pre>{{ tweets }}</pre>
+
 
     {% endblock body %}
 
