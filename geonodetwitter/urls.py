@@ -7,6 +7,6 @@ from . import views
 app_name = 'twitter'
 
 urlpatterns = [
-    url(r'^$', views.index, name='index'),
+    url(r'^$', views.home, name='home'),
     url(r'^json_geo_tweets/$', views.json_geo_tweets, name='json_geo_tweets')
 ]

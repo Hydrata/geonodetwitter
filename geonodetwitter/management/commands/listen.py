@@ -14,17 +14,17 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        #standard tweepy boilerplate
         auth = OAuthHandler(settings.CONSUMER_KEY, settings.CONSUMER_SECRET)
         auth.set_access_token(settings.ACCESS_TOKEN, settings.ACCESS_SECRET)
         api = tweepy.API(auth)
 
         for hashtag in args:
+            error = False
             try:
-                # Get a list of tweets and convert them to json so we can parse the geo-enabled ones
+                # Get a list of tweets and convert them to json so we can parse for the geo-enabled ones
                 tweets = []
-                count = 0
                 for tweet in tweepy.Cursor(api.search,  q='#%s' % hashtag).items(1000):
-                    count += 1
                     tweets.append(json.dumps(tweet._json, indent=2, sort_keys=True))
 
                 # Create an empty GeoJSON file to store our tweets
@@ -50,12 +50,14 @@ class Command(BaseCommand):
                         }
                         geo_tweets['features'].append(geo_json_feature)
 
-                        # write to models for geonode map
+                        # Create the point in GEOSGeometry format
                         temp_point = 'POINT(%s %s)' % (tweet['coordinates'].get('coordinates')[0],
                                                        tweet['coordinates'].get('coordinates')[1]
                                                        )
+                        # write to models for geonode map
                         try:
                             Tweet.objects.create(
+                                hashtag=hashtag,
                                 id_str=tweet['id_str'],
                                 text=tweet['text'],
                                 created_at=parser.parse(tweet['created_at']),
@@ -123,7 +125,7 @@ class Command(BaseCommand):
                 geo_tweets = json.dumps(geo_tweets, indent=2)
 
             except error:
-                raise CommandError('Something went wrong :( ' % hashtag)
+                raise CommandError('Something went wrong :( %s' % hashtag)
             #
             # poll.opened = False
             # poll.save()

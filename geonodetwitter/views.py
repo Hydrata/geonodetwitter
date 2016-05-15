@@ -1,132 +1,41 @@
-from django.shortcuts import render
-from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.conf import settings
-import tweepy, json
-from tweepy import OAuthHandler
-from geonodetwitter.models import Tweet
-from dateutil import parser
-from django.contrib.gis.geos import GEOSGeometry
-
-auth = OAuthHandler(settings.CONSUMER_KEY, settings.CONSUMER_SECRET)
-auth.set_access_token(settings.ACCESS_TOKEN, settings.ACCESS_SECRET)
-
-api = tweepy.API(auth)
-
-#
-# def tweet_function(self):
-#
-#     return tweets, geo_tweets
+from django.core import management
+from .models import HashtagStatus
+from .forms import HashtagStatusForm
 
 
-def index(request):
+def home(request):
+
+    if request.method == 'POST':
+        form = HashtagStatusForm(request.POST)
+
+        if form.is_valid():
+            form.cleaned_data['is_listening'] = True
+            form.save()
+            try:
+                HashtagStatus.objects.filter(hashtag=form.cleaned_data['hashtag']).update(is_listening=True)
+                management.call_command('listen', form.cleaned_data['hashtag'], interactive=False)
+            except:
+                error_message = 'Attempt to listen has failed.'
+
+        return redirect('/twitter')
+
+    else:
+        form = HashtagStatusForm()
 
     context = {
+        'form': form,
+        'hashtag_status': HashtagStatus.objects.all()
         }
-    return render(request, 'twitter/twitter_index.html', context)
+    return render(request, 'twitter/twitter_home.html', context)
 
 
 def json_geo_tweets(request):
 
-    # Get a list of tweets and convert them to json so we can parse the geo-enabled ones
-    tweets = []
-    count = 0
-    for tweet in tweepy.Cursor(api.search,  q='#rain').items(100):
-        count += 1
-        tweets.append(json.dumps(tweet._json, indent=2, sort_keys=True))
-
-    # Create an empty GeoJSON file to store our tweets
     geo_tweets = {
-        "type": "FeatureCollection",
-        "features": []
+        'test': 'test'
     }
-
-    # parse each tweet to see if it has a 'coordinate' attribute. If it does, then add it to geo_tweets
-    for line in tweets:
-        tweet = json.loads(line)
-        if tweet['coordinates']:
-
-            # create json for preview map
-            geo_json_feature = {
-                "type": "Feature",
-                "geometry": tweet['coordinates'],
-                "properties": {
-                     "text": tweet['text'],
-                     "created_at": tweet['created_at'],
-                     "id_str": tweet['id_str']
-                }
-            }
-            geo_tweets['features'].append(geo_json_feature)
-
-            # write to models for geonode map
-            temp_point = 'POINT(%s %s)' % (tweet['coordinates'].get('coordinates')[0],
-                                           tweet['coordinates'].get('coordinates')[1]
-                                           )
-            try:
-                Tweet.objects.create(
-                    id_str=tweet['id_str'],
-                    text=tweet['text'],
-                    created_at=parser.parse(tweet['created_at']),
-                    coordinates_lon=tweet['coordinates'].get('coordinates')[0],
-                    coordinates_lat=tweet['coordinates'].get('coordinates')[1],
-                    point=GEOSGeometry(temp_point)
-
-                    # coordinates_type = tweet['id_str'],
-
-                    # entities_media_id_str = tweet['id_str'],
-                    # media_url = tweet['media']['media_url']
-                    # entities_media_media_url_https = tweet['id_str'],
-                    # entities_media_url = tweet['id_str'],
-                    # entities_media_display_url = tweet['id_str'],
-                    # entities_media_expanded_url = tweet['id_str'],
-                    # entities_media_sizes_w = tweet['id_str'],
-                    # entities_media_sizes_h = tweet['id_str'],
-                    # entities_media_sizes_resize = tweet['id_str'],
-                    # entities_media_type = tweet['id_str'],
-                    # entities_media_indices = tweet['id_str'],
-                    #
-                    # entities_urls_url = tweet['id_str'],
-                    # entities_urls_display_url = tweet['id_str'],
-                    # entities_urls_expanded_url = tweet['id_str'],
-                    # entities_urls_indices = tweet['id_str'],
-                    #
-                    # entities_user_mentions_id_str = tweet['id_str'],
-                    # entities_user_mentions_screen_name = tweet['id_str'],
-                    # entities_user_mentions_name = tweet['id_str'],
-                    # entities_user_mentions_indices = tweet['id_str'],
-                    #
-                    # entities_hastags_text = tweet['id_str'],
-                    # entities_hastags_indices = tweet['id_str'],
-                    #
-                    # entities_symbols_text = tweet['id_str'],
-                    # entities_symbols_indices = tweet['id_str'],
-                    #
-                    # favorite_count = tweet['id_str'],
-                    # filter_level = tweet['id_str'],
-                    #
-                    # lang = tweet['id_str'],
-                    #
-                    # place_attibutes_street_address = tweet['id_str'],
-                    # place_attibutes_locality = tweet['id_str'],
-                    # place_attibutes_region = tweet['id_str'],
-                    # place_attibutes_iso3 = tweet['id_str'],
-                    # place_attibutes_postal_code = tweet['id_str'],
-                    # place_attibutes_phone = tweet['id_str'],
-                    # place_attibutes_twitter = tweet['id_str'],
-                    # place_attibutes_url = tweet['id_str'],
-                    # place_attibutes_app_id = tweet['id_str'],
-                    #
-                    # place_bounding_box = tweet['id_str'],
-                    # place_country = tweet['id_str'],
-                    # place_country_code = tweet['id_str'],
-                    # place_full_name = tweet['id_str'],
-                    # place_id = tweet['id_str'],
-                    # place_name = tweet['id_str'],
-                    # place_place_type = tweet['id_str'],
-                    # place_url = tweet['id_str']
-                )
-            except:
-                pass
-
-    geo_tweets = json.dumps(geo_tweets, indent=2)
 
     return HttpResponse(geo_tweets, mimetype='application/javascript')

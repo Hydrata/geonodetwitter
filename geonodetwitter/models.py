@@ -1,15 +1,21 @@
 from django.contrib.gis.db import models
 
 
+class HashtagStatus(models.Model):
+    hashtag = models.CharField(max_length=100, unique=True)
+    is_listening = models.BooleanField(default=False)
+
+
 class Tweet(models.Model):
 
     id_str = models.CharField(max_length=255, blank=False, primary_key=True)
+    hashtag = models.CharField(max_length=100, unique=False)
     text = models.CharField(max_length=150, blank=False)
     created_at = models.DateTimeField(blank=False)
 
     coordinates_lon = models.FloatField()
     coordinates_lat = models.FloatField()
-    coordinates_type = models.CharField(max_length=255)
+    #coordinates_type = models.CharField(max_length=255)
     point = models.PointField(null=True, blank=True)
 
     # entities_media_id_str = models.CharField(max_length=255)
