@@ -9,19 +9,26 @@
 
 {% block body %}
     <div class="page-header">
-      <h2 class="page-title">{% trans "Listen to Twitter" %}</h2>
+      <h2 class="page-title">{% trans "Listen to Twitter (Beta)" %}</h2>
     </div>
 
     <div class="row">
+        <div class="container">
+            This is a preview of the ChennaiFloodManagement Twitter app. It's currently under development, with a goal to
+            be operational by July when the risk of flooding will be higher. <br> But it's started raining in Chennai today (16 May 2016)
+            so we've deployed the app to test it with the <strong>#chennairains</strong> hashtag.<br><br>
+        </div>
         <div class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading">Listen to a new Hashtag</div>
                 <div class="panel-body">
-                     <form>
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <input type="submit" value="Start" formmethod="post">
-                    </form>
+                    <input type="text">
+                    <button class="btn btn-default" type="submit">not working yet</button>
+{#                     <form>#}
+{#                        {% csrf_token %}#}
+{#                        {{ form.as_p }}#}
+{#                        <input type="submit" value="Start" formmethod="post">#}
+{#                    </form>#}
                 </div>
             </div>
         </div>
@@ -36,7 +43,7 @@
 
                 {% for hash in hashtag_status %}
                     <tr>
-                        <td>{{ hash.hashtag }}</td>
+                        <td>#{{ hash.hashtag }}</td>
                         {% if hash.is_listening %}
                             <td class="success text-center">On</td>
                             {% else %}
@@ -46,6 +53,9 @@
                 {% endfor %}
             </table>
         </div>
+    </div>
+    <div>
+        <iframe style="border: groove;" height="800" width=100% src="http://data.chennaifloodmanagement.org/maps/65/embed"></iframe>
     </div>
 {% endblock %}
 
