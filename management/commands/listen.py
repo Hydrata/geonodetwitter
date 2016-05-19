@@ -6,6 +6,7 @@ from dateutil import parser
 from django.contrib.gis.geos import GEOSGeometry
 import chennaign.settings as settings
 from geonodetwitter.models import Tweet, TwitterRouter, HashtagStatus
+import datetime
 
 
 class MyStreamListener(StreamListener):
@@ -65,7 +66,7 @@ class MyStreamListener(StreamListener):
                 point=GEOSGeometry(temp_point)
             )
         else:
-            print("passing this tweet by")
+            print("passing this tweet by - " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             #raw_input("press enter to continue")
             # except:
             #     error = True
@@ -92,7 +93,7 @@ class Command(BaseCommand):
         for hashtag in args:
             error = False
             try:
-                my_stream.filter(track=['#chennairains', '#tamil nadu', '#chennaiflood', 'chennaiweather'])
+                my_stream.filter(track=['#chennairains', '#flood', '#flooding', '#tamil nadu', '#chennaiflood', '#chennaiweather'])
 
             except error:
                 raise CommandError('Something went wrong :( %s' % hashtag)
