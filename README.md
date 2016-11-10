@@ -3,7 +3,7 @@ This app will listen to a specific set of hashtags on twitter and save any geore
 
 ###Installation
 1. Open a terminal and navigate into the parent of your geonode folder (usually `/usr/local/lib/python2.7/dist-packages` for geonode 2.4 installed with apt-get)
-2. `Git clone https://github.com/Hydrata/geonode-twitter.git`
+2. `Git clone https://github.com/Hydrata/geonodetwitter.git`
 3. add `"geonodetwitter",` to your `INSTALLED_APPS` in settings.py
 4. add `DATABASE_ROUTERS = ['geonodetwitter.models.TwitterRouter']` in settings.py
 5. Open a terminal and navigate to your Django root directory (the one with "manage.py" in it)
