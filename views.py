@@ -6,8 +6,8 @@ from .models import HashtagStatus
 from .forms import HashtagStatusForm
 
 
-def home(request):
-
+def twitter_home(request):
+    error_message = ''
     if request.method == 'POST':
         form = HashtagStatusForm(request.POST)
 
@@ -29,7 +29,7 @@ def home(request):
         'form': form,
         'hashtag_status': HashtagStatus.objects.all()
         }
-    return render(request, 'twitter/twitter_home.html', context)
+    return render(request, 'geonodetwitter/twitter_home.html', context)
 
 
 def json_geo_tweets(request):

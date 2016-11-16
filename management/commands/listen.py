@@ -4,9 +4,10 @@ from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
 from dateutil import parser
 from django.contrib.gis.geos import GEOSGeometry
-import chennaign.settings as settings
-from geonodetwitter.models import Tweet, TwitterRouter, HashtagStatus
+import cfm.settings as settings
+from apps.geonodetwitter.models import Tweet, TwitterRouter, HashtagStatus
 import datetime
+import time
 
 
 class MyStreamListener(StreamListener):
@@ -24,11 +25,14 @@ class MyStreamListener(StreamListener):
         if 'limit' in tweet:
             #print(data)
             print('This tweet has limit')
+            with open("/var/log/geonode/twitterlog.txt", 'a') as f:
+                f.write("This tweet has limits - " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
             #raw_input("PRESS ENTER TO CONTINUE3.")
 
         elif tweet['coordinates']:
-            #print(data)
-            print('This tweet has coordinates')
+            print(data)
+            with open("/var/log/geonode/twitterlog.txt", 'a') as f:
+                f.write("This tweet has coordinates - " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
             #raw_input("PRESS ENTER TO CONTINUE4.")
 
             # create json for preview map
@@ -55,21 +59,31 @@ class MyStreamListener(StreamListener):
                                            )
             # write to models for geonode map
             # try:
-            Tweet.objects.create(
-                #hashtag=hashtag,
-                hashtag='varied',
-                id_str=tweet['id_str'],
-                text=tweet['text'],
-                created_at=parser.parse(tweet['created_at']),
-                coordinates_lon=tweet['coordinates'].get('coordinates')[0],
-                coordinates_lat=tweet['coordinates'].get('coordinates')[1],
-                point=GEOSGeometry(temp_point)
-            )
+            with open("/var/log/geonode/twitterlog.txt", 'a') as f:
+                f.write("About to create Tweet - " + tweet['text'].encode('utf-8') + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
+            print "about to create Tweet"
+            try:
+                Tweet.objects.create(
+                    #hashtag=hashtag,
+                    hashtag='varied',
+                    id_str=tweet['id_str'],
+                    text=tweet['text'].encode('utf-8'),
+                    created_at=parser.parse(tweet['created_at']),
+                    coordinates_lon=tweet['coordinates'].get('coordinates')[0],
+                    coordinates_lat=tweet['coordinates'].get('coordinates')[1],
+                    point=GEOSGeometry(temp_point)
+                )
+                with open("/var/log/geonode/twitterlog.txt", 'a') as f:
+                    f.write("Erm, that seems to have worked... " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
+                print "worked"
+            except Exception as e:
+                with open("/var/log/geonode/twitterlog.txt", 'a') as f:
+                    f.write("Tweet error - " + str(e) + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
+                print "error1" + str(e)
         else:
-            print("passing this tweet by - " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-            #raw_input("press enter to continue")
-            # except:
-            #     error = True
+            with open("/var/log/geonode/twitterlog.txt", 'a') as f:
+                f.write("...passing this tweet by - " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
+            print "passing this tweet by... no coordinates"
 
     def on_error(self, status):
         print("Oh no, error!")
@@ -89,11 +103,19 @@ class Command(BaseCommand):
         api = tweepy.API(auth)
 
         my_stream = tweepy.Stream(auth=api.auth, listener=MyStreamListener())
-
         for hashtag in args:
             error = False
             try:
-                my_stream.filter(track=['#chennairains', '#flood', '#flooding', '#tamil nadu', '#chennaiflood', '#chennaiweather'])
+                my_stream.filter(track=[
+                    '#love',
+                    '#chennairains',
+                    '#flood',
+                    '#flooding',
+                    '#tamil nadu',
+                    '#chennaiflood',
+                    '#chennaiweather',
+                    '#newyork'
+                ])
 
             except error:
                 raise CommandError('Something went wrong :( %s' % hashtag)
