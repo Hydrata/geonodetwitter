@@ -22,4 +22,4 @@ This app will listen to a specific set of hashtags on twitter and save any geore
 4. Publish "geonodetwitter_tweet"
 5. Calculate the min/max bounds 
 6. Save
-7. Run `geonode updatelayers -f geonodetwitter_tweet` from your geonode commandprompt
+7. Run `python manage.py updatelayers -f geonodetwitter_tweet` from your geonode commandprompt

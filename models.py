@@ -15,11 +15,12 @@ class Tweet(models.Model):
 
     coordinates_lon = models.FloatField()
     coordinates_lat = models.FloatField()
-    #coordinates_type = models.CharField(max_length=255)
     point = models.PointField(null=True, blank=True)
+    radius = models.FloatField(null=True, blank=True)
 
     # entities_media_id_str = models.CharField(max_length=255)
     media_url = models.CharField(max_length=2048)
+
     # entities_media_media_url_https = models.CharField(max_length=2048)
     # entities_media_url = models.CharField(max_length=2048)
     # entities_media_display_url = models.CharField(max_length=2048)
@@ -69,6 +70,7 @@ class Tweet(models.Model):
     # place_name = models.CharField(max_length=2048)
     # place_place_type = models.CharField(max_length=2048)
     # place_url = models.CharField(max_length=2048)
+    data = models.TextField()
 
     class Meta:
         app_label = 'geonodetwitter'
